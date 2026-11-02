@@ -61,7 +61,7 @@ pre{white-space:pre-wrap;margin:0;font-family:inherit}
 // ▼ Supabase 프로젝트 정보 (대시보드 → Project Settings → API Keys 에서 복사)
 //   key 는 anon(공개) 키 또는 publishable 키. 공개돼도 괜찮은 키입니다. service_role 키는 절대 넣지 마세요.
 const CONFIG = {
-  url: 'https://YOUR-PROJECT.supabase.co',
+  url: 'https://sfthkpvsrxmjxahisaxn.supabase.co',
   key: 'sb_publishable_9KuL4VC5cyfI46jADgRQSw_-5uOMrAg',
 };
 </script>
@@ -101,7 +101,8 @@ const CONFIG = {
   async function rpc(fn, args = {}) {
     const headers = { apikey: CONFIG.key, 'content-type': 'application/json' };
     if (CONFIG.key.startsWith('eyJ')) headers.authorization = 'Bearer ' + CONFIG.key; // 기존 anon 키(JWT)
-    const res = await fetch(`${CONFIG.url}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
+    const base = CONFIG.url.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, ''); // 주소 끝에 /rest/v1/ 을 붙여 넣어도 동작하도록
+    const res = await fetch(`${base}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
     const text = await res.text();
     let data = null;
     try { data = text ? JSON.parse(text) : null; } catch {}
