@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101318">
+<title>계단 챌린지</title>
+<style>
+:root{--bg:#101318;--card:#1a1f27;--line:#2a313c;--text:#eef1f5;--muted:#8b95a5;--accent:#c6f432;--accent-ink:#111;--warn:#ff8a65}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif}
+main{max-width:520px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top)) 16px 32px}
+body.has-tabs main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+a{color:inherit;text-decoration:none}h1{font-size:26px;margin:2px 0 0}h2{font-size:16px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+header{margin:4px 0 16px}.muted{color:var(--muted)}.small,small{font-size:13px}.center{text-align:center}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:0 0 12px}
+.card.live{display:flex;justify-content:space-between;border-color:var(--accent);color:var(--accent)}
+.card.err{border-color:var(--warn);color:var(--warn)}.card.pb{border-color:var(--accent);font-weight:600}
+.hero{text-align:center;padding:28px 16px}.hero.win{border-color:var(--accent)}
+.timer{font-size:64px;font-weight:800;letter-spacing:-2px;font-variant-numeric:tabular-nums;margin:8px 0;color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 12px}.stats.two{grid-template-columns:1fr 1fr}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center}
+.stats small{display:block;color:var(--muted);font-size:12px}.stats b{font-size:17px;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+.icons{display:flex;flex-wrap:wrap;gap:6px;font-size:28px}.more{font-size:13px;font-weight:400;color:var(--muted)}
+.list,.rank{list-style:none;margin:0;padding:0}.list li,.rank li{border-top:1px solid var(--line)}.list li:first-child,.rank li:first-child{border-top:0}
+.list li,.list li a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;width:100%}.list li a{padding:0}
+.list b,.rank b{font-variant-numeric:tabular-nums}.act{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rank li{display:flex;align-items:center;gap:12px;padding:10px 4px}.rank li.me{background:rgba(198,244,50,.08);border-radius:10px}
+.rk{width:32px;text-align:center;font-size:20px;font-weight:700}.nm{flex:1;display:flex;flex-direction:column}.nm small{color:var(--muted)}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin:0 0 8px}
+.seg a{flex:1;text-align:center;padding:8px 0;border-radius:9px;font-size:14px;color:var(--muted)}.seg a.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.seg.sm{margin-bottom:12px}.seg.sm a{padding:6px 0;font-size:13px}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.badge .ic{font-size:34px}.badge b{font-size:13px}.badge small{font-size:11px;color:var(--muted)}.badge.off{opacity:.35;filter:grayscale(1)}
+.card .badges .badge{background:var(--bg)}
+label{display:block;font-size:14px;color:var(--muted);margin:0 0 12px}
+input,select{display:block;width:100%;margin-top:6px;padding:12px;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px}
+.btn{display:block;width:100%;text-align:center;padding:14px;font-size:16px;font-weight:700;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);margin:4px 0 12px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn:disabled{opacity:.5}
+.mini{padding:4px 10px;font-size:12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+pre{white-space:pre-wrap;margin:0;font-family:inherit}
+.how ol{margin:0;padding-left:20px}.how li{margin:4px 0}
+.tagurl{margin:10px 0}.tagurl code,code{display:block;word-break:break-all;font-size:12px;background:var(--bg);padding:8px;border-radius:8px;margin-top:4px;color:var(--accent)}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;background:rgba(16,19,24,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom))}
+.tabs[hidden]{display:none}
+.tabs a{flex:1;max-width:160px;text-align:center;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center}.tabs a span{font-size:22px}.tabs a.on{color:var(--accent)}
+</style>
+</head>
+<body>
+<main id="app"><p class="center muted">불러오는 중…</p></main>
+<nav class="tabs" id="tabs" hidden>
+  <a href="#/" data-tab="home"><span>🏠</span>홈</a>
+  <a href="#/board" data-tab="board"><span>🏆</span>순위</a>
+  <a href="#/badges" data-tab="badges"><span>🎖️</span>뱃지</a>
+</nav>
+
+<script>
+// ▼ Supabase 프로젝트 정보 (대시보드 → Project Settings → API Keys 에서 복사)
+//   key 는 anon(공개) 키 또는 publishable 키. 공개돼도 괜찮은 키입니다. service_role 키는 절대 넣지 마세요.
+const CONFIG = {
+  url: 'https://YOUR-PROJECT.supabase.co',
+  key: 'sb_publishable_9KuL4VC5cyfI46jADgRQSw_-5uOMrAg',
+};
+</script>
+
+<script>
+// 계단 챌린지 — Supabase 버전 웹앱
+// NFC 태그 주소: <이 페이지>?t=B1&k=서명키  →  sc_tag 호출 (시간은 DB 서버 시각으로 기록)
+(() => {
+  const KST = 9 * 3600000;
+  const STATUS = { active: '등반 중', done: '완주', invalid: '무효', cancelled: '취소', expired: '시간 초과' };
+  const PERIODS = { today: '오늘', week: '이번 주', month: '이번 달', all: '전체' };
+  const MODES = { time: '기록', count: '횟수', team: '팀' };
+  const HEIGHT_GOALS = [['롯데타워', 555], ['한라산', 1947], ['백두산', 2744], ['에베레스트', 8849]];
+
+  const $app = document.getElementById('app');
+  const $tabs = document.getElementById('tabs');
+  let C = null; // sc_config 결과
+  let timers = [];
+
+  // Safari 개인정보 보호 모드 등에서 저장소 접근이 실패해도 동작하도록
+  const local = {
+    get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} },
+  };
+  const session = {
+    get: k => { try { return sessionStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch {} },
+  };
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+  const fmt = ms => { const t = Math.floor(ms / 100); return `${Math.floor(t / 600)}:${String(Math.floor(t / 10) % 60).padStart(2, '0')}.${t % 10}`; };
+  const kstIso = ms => new Date(ms + KST).toISOString().slice(0, 19).replace('T', ' ');
+  const fmtDate = ms => kstIso(ms).slice(5, 16).replace('-', '/');
+  const medal = i => ['🥇', '🥈', '🥉'][i] || i + 1;
+  const badge = id => C.badges.find(b => b.id === id);
+
+  async function rpc(fn, args = {}) {
+    const headers = { apikey: CONFIG.key, 'content-type': 'application/json' };
+    if (CONFIG.key.startsWith('eyJ')) headers.authorization = 'Bearer ' + CONFIG.key; // 기존 anon 키(JWT)
+    const res = await fetch(`${CONFIG.url}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch {}
+    if (!res.ok) {
+      const e = new Error((data && data.message) || `서버 오류 (${res.status})`);
+      e.code = data && data.message;
+      throw e;
+    }
+    return data;
+  }
+
+  function render(html, tab = null) {
+    timers.forEach(clearInterval);
+    timers = [];
+    $app.innerHTML = html;
+    $tabs.hidden = !tab;
+    document.body.classList.toggle('has-tabs', !!tab);
+    $tabs.querySelectorAll('a').forEach(a => a.classList.toggle('on', a.dataset.tab === tab));
+  }
+
+  function msgPage(title, text = '', back = local.get('sc_token') ? ['#/', '홈으로'] : ['#/join', '시작하기']) {
+    render(`<div class="card hero"><h1>${esc(title)}</h1>${text ? `<p class="muted">${esc(text)}</p>` : ''}</div>
+      <a class="btn" href="${back[0]}">${back[1]}</a>`);
+  }
+
+  function handleError(e) {
+    if (e.code === 'NO_USER') {
+      local.set('sc_token', null);
+      return go('/join');
+    }
+    msgPage('문제가 생겼어요', e.message);
+  }
+
+  const go = path => (location.hash === '#' + path ? route() : (location.hash = path));
+  const on = (sel, ev, fn) => $app.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn));
+
+  // ───────────── 라우팅 ─────────────
+  async function route() {
+    const h = location.hash.slice(1) || '/';
+    const [path, qs] = h.split('?');
+    const q = new URLSearchParams(qs || '');
+    window.scrollTo(0, 0);
+    try {
+      if (path === '/join') return joinPage();
+      if (path === '/board') return board(q);
+      if (path === '/admin') return admin();
+      if (path === '/logout') { local.set('sc_token', null); return go('/join'); }
+      const token = local.get('sc_token');
+      if (!token) return go('/join');
+      if (path === '/') return home(token);
+      if (path === '/run') return runPage(token);
+      if (path.startsWith('/result/')) return result(token, Number(path.slice(8)));
+      if (path === '/badges') return badgesPage(token);
+      msgPage('페이지가 없어요', '주소를 확인해 주세요.');
+    } catch (e) {
+      handleError(e);
+    }
+  }
+
+  async function handleTag(tag) {
+    try {
+      const r = await rpc('sc_tag', { p_token: local.get('sc_token'), p_tag: tag.t, p_key: tag.k });
+      if (r.action === 'started' || r.action === 'checkpoint') return go('/run');
+      if (r.action === 'finished') return go('/result/' + r.run_id);
+      msgPage(`${C.start}에서 먼저 태그하세요`, `${C.start} 계단 입구의 태그를 찍어야 기록이 시작돼요.`);
+    } catch (e) {
+      if (e.code === 'BAD_TAG') return msgPage('알 수 없는 태그', '태그 정보가 올바르지 않아요. 관리자에게 문의해 주세요.');
+      handleError(e);
+    }
+  }
+
+  // ───────────── 화면 ─────────────
+  async function home(token) {
+    const me = await rpc('sc_me', { p_token: token });
+    local.set('sc_uid', me.user.id);
+    local.set('sc_team', me.user.team);
+    const s = me.stats;
+    const next = HEIGHT_GOALS.find(([, h]) => h > s.total);
+    const owned = new Set(me.badges.map(b => b.id));
+    render(`
+      <header><div class="muted">안녕하세요</div><h1>${esc(me.user.name)}님 👋</h1></header>
+      ${me.active ? `<a class="card live" href="#/run"><b>⏱ 등반 중</b><span>타이머 보기 →</span></a>` : ''}
+      <section class="stats">
+        <div><small>최고 기록</small><b>${s.best ? fmt(s.best) : '-'}</b></div>
+        <div><small>완주</small><b>${s.n}회</b></div>
+        <div><small>누적 높이</small><b>${s.total.toLocaleString()}m</b></div>
+        <div><small>연속</small><b>${s.streak}일</b></div>
+      </section>
+      ${next ? `<div class="card"><small class="muted">${next[0]}까지 ${(next[1] - s.total).toLocaleString()}m 남음</small>
+        <div class="bar"><i style="width:${Math.min(100, (s.total / next[1]) * 100).toFixed(1)}%"></i></div></div>` : ''}
+      <div class="card"><h2>내 뱃지 <a href="#/badges" class="more">전체 보기</a></h2>
+        <div class="icons">${C.badges.filter(b => owned.has(b.id)).map(b => `<span title="${esc(b.name)}">${b.icon}</span>`).join('')
+          || '<span class="muted small">아직 없어요. 첫 완주에 도전해 보세요!</span>'}</div></div>
+      <div class="card"><h2>최근 기록</h2>${me.recent.length ? `<ul class="list">${me.recent.map(r => `
+        <li><a href="#/result/${r.id}"><span>${fmtDate(r.started_at)}</span><b class="${r.status === 'done' ? '' : 'muted'}">${r.status === 'done' ? fmt(r.duration_ms) : STATUS[r.status]}</b></a></li>`).join('')}</ul>`
+        : '<p class="muted small">아직 기록이 없어요.</p>'}</div>
+      <div class="card how"><h2>참여 방법</h2><ol>
+        <li><b>${esc(C.start)}</b> 계단 입구 NFC 태그에 폰을 대고 알림을 눌러요</li>
+        ${C.checkpoints.length ? `<li>중간에 <b>${C.checkpoints.map(esc).join(', ')}</b> 태그도 찍어요</li>` : ''}
+        <li><b>${esc(C.finish)}</b>에 도착하면 태그를 찍어요. 기록 완료!</li></ol></div>
+      <p class="center small"><a class="muted" href="#/logout">로그아웃</a></p>`, 'home');
+  }
+
+  async function runPage(token) {
+    const me = await rpc('sc_me', { p_token: token });
+    const run = me.active;
+    if (!run) return go('/');
+    const cps = run.checkpoints || {};
+    render(`
+      <div class="card hero">
+        <div class="muted">${esc(C.start)} 출발 · ${fmtDate(run.started_at)}</div>
+        <div class="timer" id="t">0:00.0</div>
+        <div class="muted">${esc(C.finish)} 태그를 찍으면 기록이 완료돼요</div>
+      </div>
+      ${C.checkpoints.length ? `<div class="card"><h2>체크포인트</h2><ul class="list">${C.checkpoints.map(cp => `
+        <li><span>${esc(cp)}</span><b>${cp in cps ? '✅ ' + fmt(cps[cp]) : '⬜ 아직'}</b></li>`).join('')}</ul></div>` : ''}
+      <button class="btn ghost" id="cancel">등반 취소</button>`);
+    const el = document.getElementById('t');
+    const off = Date.now() - me.now;
+    const max = C.max_minutes * 60000;
+    const tick = () => { const ms = Date.now() - off - run.started_at; el.textContent = ms > max ? '시간 초과' : fmt(Math.max(0, ms)); };
+    tick();
+    timers.push(setInterval(tick, 100));
+    on('#cancel', 'click', async () => {
+      if (!confirm('이번 등반을 취소할까요?')) return;
+      await rpc('sc_cancel', { p_token: token });
+      go('/');
+    });
+  }
+
+  async function result(token, id) {
+    const d = await rpc('sc_result', { p_token: token, p_run: id });
+    const run = d.run;
+    if (run.status === 'active') return go('/run');
+    const ok = run.status === 'done';
+    const cps = Object.entries(run.checkpoints || {});
+    const nb = d.new_badges.map(badge).filter(Boolean);
+    render(`
+      <div class="card hero ${ok ? 'win' : ''}">
+        <div class="muted">${esc(C.start)} → ${esc(C.finish)} · ${fmtDate(run.started_at)}</div>
+        <div class="timer">${run.duration_ms != null ? fmt(run.duration_ms) : '-'}</div>
+        <div>${ok ? '완주했어요! 💪' : `<b>${STATUS[run.status]}</b>${run.reason ? ' · ' + esc(run.reason) : ''}`}</div>
+      </div>
+      ${ok ? `
+        ${d.is_pb ? `<div class="card pb">🎉 개인 최고 기록! <span class="muted">(이전 ${fmt(d.prev_best)})</span></div>` : ''}
+        <section class="stats two">
+          <div><small>오늘 순위</small><b>${d.today.rank}위 <span class="muted small">/ ${d.today.of}명</span></b></div>
+          <div><small>전체 순위</small><b>${d.all.rank}위 <span class="muted small">/ ${d.all.of}명</span></b></div>
+        </section>
+        ${cps.length ? `<div class="card"><h2>구간 기록</h2><ul class="list">${cps.map(([k, v]) => `<li><span>${esc(k)}</span><b>${fmt(v)}</b></li>`).join('')}</ul></div>` : ''}
+        ${nb.length ? `<div class="card"><h2>새 뱃지 획득!</h2><div class="badges">${nb.map(b => badgeTile(b, {})).join('')}</div></div>` : ''}` : ''}
+      <a class="btn" href="#/board">순위 보기</a>
+      <a class="btn ghost" href="#/">홈으로</a>`);
+  }
+
+  async function board(q) {
+    const period = PERIODS[q.get('p')] ? q.get('p') : 'today';
+    const mode = MODES[q.get('m')] ? q.get('m') : 'time';
+    const tv = q.has('tv');
+    const link = (p, m) => `#/board?p=${p}&m=${m}${tv ? '&tv' : ''}`;
+    const rows = await rpc('sc_board', { p_period: period, p_mode: mode });
+    const uid = Number(local.get('sc_uid'));
+    const team = local.get('sc_team');
+    const items = mode === 'team'
+      ? rows.map((r, i) => `<li${team && r.team === team ? ' class="me"' : ''}><span class="rk">${medal(i)}</span>
+          <span class="nm">${esc(r.team || '(팀 없음)')}<small>${r.people}명 참여 · 최고 ${fmt(r.best)}</small></span><b>${r.cnt}회</b></li>`)
+      : rows.map((r, i) => `<li${r.id === uid ? ' class="me"' : ''}><span class="rk">${medal(i)}</span>
+          <span class="nm">${esc(r.name)}<small>${esc(r.team)}</small></span><b>${mode === 'count' ? r.cnt + '회' : fmt(r.best)}</b></li>`);
+    const y = window.scrollY;
+    render(`
+      <header><h1>🏆 순위</h1></header>
+      <nav class="seg">${Object.entries(PERIODS).map(([k, v]) => `<a href="${link(k, mode)}" class="${k === period ? 'on' : ''}">${v}</a>`).join('')}</nav>
+      <nav class="seg sm">${Object.entries(MODES).map(([k, v]) => `<a href="${link(period, k)}" class="${k === mode ? 'on' : ''}">${v}</a>`).join('')}</nav>
+      <div class="card"><ul class="rank">${items.join('') || `<li class="muted">${PERIODS[period]} 기록이 아직 없어요. 첫 주인공이 되어 보세요!</li>`}</ul></div>
+      ${tv ? `<p class="center muted small">30초마다 자동 새로고침 · ${fmtDate(Date.now())}</p>` : ''}`, tv ? null : 'board');
+    if (tv) {
+      window.scrollTo(0, y);
+      const here = location.hash;
+      timers.push(setInterval(() => { if (location.hash === here) board(q).catch(() => {}); }, 30000));
+    }
+  }
+
+  async function badgesPage(token) {
+    const me = await rpc('sc_me', { p_token: token });
+    const got = Object.fromEntries(me.badges.map(b => [b.id, b]));
+    render(`
+      <header><h1>🎖️ 뱃지</h1><div class="muted">${me.badges.length} / ${C.badges.length}개 획득 · 누적 ${me.stats.total.toLocaleString()}m</div></header>
+      <div class="badges">${C.badges.map(b => badgeTile(b, got[b.id])).join('')}</div>`, 'badges');
+  }
+
+  // got: 획득 정보 {n, at} (없으면 미획득으로 흐리게 표시)
+  function badgeTile(b, got) {
+    let sub = b.desc;
+    if (got && got.at) sub = b.repeat && got.n > 1 ? `×${got.n}회 획득` : fmtDate(got.at).slice(0, 5) + ' 획득';
+    return `<div class="badge ${got ? '' : 'off'}"><div class="ic">${b.icon}</div><b>${esc(b.name)}</b><small>${esc(sub)}</small></div>`;
+  }
+
+  // ───────────── 가입 / 로그인 ─────────────
+  function joinPage(error = '') {
+    render(`
+      <header><h1>🏃 ${esc(C.name)}</h1><div class="muted">처음 한 번만 등록하면 돼요</div></header>
+      ${error ? `<div class="card err">${esc(error)}</div>` : ''}
+      <form class="card" id="join">
+        <h2>처음이에요</h2>
+        <label>이름<input name="name" required maxlength="20" autocomplete="name"></label>
+        <label>팀/부서<input name="team" maxlength="20" placeholder="예: 기술지원팀"></label>
+        <label>PIN 4자리 <small class="muted">(다른 폰에서 로그인할 때 필요)</small><input name="pin" required inputmode="numeric" pattern="\\d{4}" maxlength="4"></label>
+        <button class="btn">시작하기</button>
+      </form>
+      <form class="card" id="login">
+        <h2>이미 등록했어요</h2>
+        <label>이름<input name="name" required maxlength="20"></label>
+        <label>PIN<input name="pin" required inputmode="numeric" pattern="\\d{4}" maxlength="4"></label>
+        <button class="btn ghost">로그인</button>
+      </form>`);
+    const submit = (fn, args) => async e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      e.target.querySelector('button').disabled = true;
+      try {
+        const r = await rpc(fn, args(f));
+        local.set('sc_token', r.token);
+        const pending = JSON.parse(session.get('sc_pending') || 'null');
+        session.set('sc_pending', null);
+        if (pending && Date.now() - pending.at < 10 * 60000) return handleTag(pending); // 가입 직후 원래 찍은 태그 처리
+        go('/');
+      } catch (err) {
+        joinPage(err.message);
+      }
+    };
+    on('#join', 'submit', submit('sc_join', f => ({ p_name: f.get('name'), p_team: f.get('team'), p_pin: f.get('pin') })));
+    on('#login', 'submit', submit('sc_login', f => ({ p_name: f.get('name'), p_pin: f.get('pin') })));
+  }
+
+  // ───────────── 관리자 ─────────────
+  async function admin() {
+    const key = session.get('sc_admin');
+    if (!key) {
+      render(`<form class="card" id="adm"><h2>관리자</h2><label>비밀번호<input type="password" name="key" required></label><button class="btn">들어가기</button></form>`);
+      on('#adm', 'submit', e => { e.preventDefault(); session.set('sc_admin', new FormData(e.target).get('key')); admin(); });
+      return;
+    }
+    let d;
+    try {
+      d = await rpc('sc_admin', { p_key: key });
+    } catch (e) {
+      session.set('sc_admin', null);
+      return msgPage(e.code === 'ADMIN' ? '비밀번호가 틀렸어요' : '관리자 페이지를 열 수 없어요', e.code === 'ADMIN' ? '' : e.message, ['#/admin', '다시 시도']);
+    }
+    const base = location.origin + location.pathname;
+    render(`
+      <header><h1>⚙️ 관리자</h1></header>
+      <div class="card"><h2>NFC 태그에 쓸 URL</h2><p class="muted small">NFC Tools 앱 → 쓰기 → 레코드 추가 → URL로 각 주소를 태그에 기록하세요.</p>
+        ${d.tags.map(t => `<div class="tagurl"><b>${esc(t.tag)}</b><code>${esc(`${base}?t=${encodeURIComponent(t.tag)}&k=${t.key}`)}</code></div>`).join('')}
+        <p class="muted small">로비 TV용 순위판: <code>${esc(base)}#/board?tv</code></p></div>
+      <div class="card"><h2>네이버웍스 알림</h2>
+        ${d.nw.configured ? `<p class="muted small">실시간 알림(신기록·오늘 1위·희귀 뱃지): ${d.nw.notify_runs ? '켜짐' : '꺼짐'} · 주간 결과: 금 17:30 · 월간 결과: 1일 17:30</p>
+          <div class="act">${[['test', '테스트 메시지'], ['weekly', '주간 결과 지금 보내기'], ['monthly', '지난달 결과 보내기']]
+            .map(([a, l]) => `<button class="mini" data-nw="${a}">${l}</button>`).join('')}</div><div id="nwres"></div>`
+          : '<p class="muted small">❌ 미설정. README의 "네이버웍스 봇 연결" 순서대로 naverworks.sql 을 실행하면 켜져요.</p>'}</div>
+      <div class="card"><h2>최근 기록 <button class="mini" id="csv">CSV 받기</button></h2><ul class="list">${d.runs.map(r => `
+        <li><span>${esc(r.name)} <small class="muted">${fmtDate(r.started_at)}</small><br><small class="muted">${STATUS[r.status]}${r.reason ? ' · ' + esc(r.reason) : ''}</small></span>
+        <span class="act"><b>${r.duration_ms != null ? fmt(r.duration_ms) : '-'}</b>
+        ${r.status === 'done' ? `<button class="mini" data-run="${r.id}" data-action="invalidate">무효</button>`
+          : r.duration_ms != null ? `<button class="mini" data-run="${r.id}" data-action="restore">복구</button>` : ''}</span></li>`).join('')}</ul></div>
+      <form class="card" id="pin"><h2>PIN 초기화</h2>
+        <label>직원<select name="id">${d.users.map(u => `<option value="${u.id}">${esc(u.name)} ${u.team ? '(' + esc(u.team) + ')' : ''}</option>`).join('')}</select></label>
+        <label>새 PIN<input name="pin" required inputmode="numeric" pattern="\\d{4}" maxlength="4"></label><button class="btn ghost">변경</button></form>
+      <p class="center small"><a class="muted" href="#/admin" id="admout">관리자 로그아웃</a></p>`);
+
+    on('[data-run]', 'click', async e => {
+      await rpc('sc_admin_run', { p_key: key, p_id: Number(e.target.dataset.run), p_action: e.target.dataset.action });
+      admin();
+    });
+    on('#pin', 'submit', async e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      try {
+        await rpc('sc_admin_pin', { p_key: key, p_user: Number(f.get('id')), p_pin: f.get('pin') });
+        alert('PIN을 바꿨어요.');
+        e.target.reset();
+      } catch (err) { alert(err.message); }
+    });
+    on('#csv', 'click', async () => {
+      const rows = await rpc('sc_admin_export', { p_key: key });
+      const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const lines = [['id', '이름', '팀', '시작', '도착', '기록(초)', '상태', '사유'].join(',')].concat(rows.map(r =>
+        [r.id, r.name, r.team, kstIso(r.started_at), r.finished_at ? kstIso(r.finished_at) : '', r.duration_ms != null ? (r.duration_ms / 1000).toFixed(1) : '', STATUS[r.status], r.reason].map(cell).join(',')));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv' }));
+      a.download = 'stair-runs.csv';
+      a.click();
+    });
+    on('#admout', 'click', e => { e.preventDefault(); session.set('sc_admin', null); admin(); });
+    on('[data-nw]', 'click', async e => {
+      const box = document.getElementById('nwres');
+      box.innerHTML = '<p class="muted small">보내는 중…</p>';
+      try {
+        const r = await rpc('sc_admin_nw', { p_key: key, p_action: e.target.dataset.nw });
+        const show = status => { box.innerHTML = `<p class="small">${status}</p><div class="card"><pre class="small">${esc(r.text)}</pre></div>`; };
+        if (r.request_id == null) return show('❌ 전송 함수가 설정되지 않았어요 (naverworks.sql 의 nw_function_url 확인)');
+        for (let i = 0; i < 10; i++) {
+          await new Promise(ok => setTimeout(ok, 1500));
+          const s = await rpc('sc_admin_nw_status', { p_key: key, p_req: r.request_id });
+          if (!s) continue;
+          if (s.status >= 200 && s.status < 300) return show('✅ 보냈어요. 네이버웍스 채팅방을 확인하세요.');
+          return show(`❌ 전송 실패 (${esc(s.status ?? '')}) ${esc(s.error || s.body || '')}`);
+        }
+        show('⏳ 응답을 기다리다 멈췄어요. 채팅방을 확인해 보세요.');
+      } catch (err) {
+        box.innerHTML = `<p class="small">❌ ${esc(err.message)}</p>`;
+      }
+    });
+  }
+
+  // ───────────── 시작 ─────────────
+  async function start() {
+    try {
+      C = await rpc('sc_config');
+    } catch (e) {
+      $app.innerHTML = `<div class="card hero"><h1>서버에 연결할 수 없어요</h1><p class="muted">${esc(
+        CONFIG.url.includes('YOUR-PROJECT') ? 'index.html 위쪽의 CONFIG(url, key)를 설정해 주세요.' : e.message)}</p></div>`;
+      return;
+    }
+    document.title = C.name;
+    window.addEventListener('hashchange', route);
+    const p = new URLSearchParams(location.search);
+    if (p.get('t')) {
+      const tag = { t: p.get('t'), k: p.get('k'), at: Date.now() };
+      // 새로고침해도 태그가 다시 처리되지 않도록 주소에서 태그 정보를 지움
+      history.replaceState(null, '', location.pathname + '#/');
+      if (!local.get('sc_token')) {
+        session.set('sc_pending', JSON.stringify(tag));
+        return go('/join');
+      }
+      return handleTag(tag);
+    }
+    route();
+  }
+  start();
+})();
+</script>
+</body>
+</html>
